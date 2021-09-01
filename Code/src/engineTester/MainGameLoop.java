@@ -3,11 +3,14 @@ package engineTester;
 //OpenGL imports
 import org.lwjgl.opengl.Display;
 
+import models.RawModel;
+import models.TexturedModel;
 //import for rendering
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
-import renderEngine.RawModel;
 import renderEngine.Renderer;
+import shaders.StaticShader;
+import textures.ModelTexture;
 
 //Project name
 public class MainGameLoop {
@@ -18,9 +21,10 @@ public class MainGameLoop {
 		//Create the display when the program runs
 		DisplayManager.createDisplay();
 		
-		//Creating methods
+		//Importing other classes
 		Loader loader = new Loader();
 		Renderer renderer = new Renderer();
+		StaticShader shader = new StaticShader();
 		
 		float[] vertices = {
 				-0.5f, 0.5f, 0f,//v0
@@ -34,7 +38,17 @@ public class MainGameLoop {
 				3,1,2//bottom right triangle (v3, v1, v2)
 		};
 		
-		RawModel model = loader.loadtoVAO(vertices, indices);
+		float[] textureCoords = {
+				0,0,
+				0,1,
+				1,1,
+				1,0
+		};
+		
+		RawModel model = loader.loadtoVAO(vertices, textureCoords, indices);
+		ModelTexture texture = new ModelTexture(loader.loadTexture("image"));
+		TexturedModel texturedModel = new TexturedModel(model, texture);
+		
 				 
 		 
 		
@@ -45,13 +59,16 @@ public class MainGameLoop {
 			//game logic
 			//rendering
 			renderer.prepare();
-			renderer.render(model);
+			shader.start();
+			renderer.render(texturedModel);
+			shader.stop();
 			DisplayManager.updateDisplay();
 			
 		}
 		
 		//Close the display once you end the while loop
 		//And clean up the buffers
+		shader.cleanUp();
 		loader.CleanUp();
 		DisplayManager.closeDisplay();
 
