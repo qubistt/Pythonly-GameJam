@@ -27,8 +27,8 @@ public class MainGameLoop {
 		StaticShader shader = new StaticShader();
 		
 		float[] vertices = {
-				-0.5f, 0.5f, 0f,//v0
-				-0.5f, -0.5f, 0f,//v1
+				-1.0f, 1.0f, 0f,//v0
+				-1.0f, -1.0f, 0f,//v1
 				0.5f, -0.5f, 0f,//v2
 				0.5f, 0.5f, 0f,//v3
 		};
