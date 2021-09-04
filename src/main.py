@@ -36,14 +36,14 @@ def splashScreen():
     )
     global playBtn
     playBtn = Button(text='', color=color.white, icon='../assets/textures/play-button', scale=(0.5,0.25), text_origin=(0,0),origin = (0,1))
-    playBtn.on_click = startGame() # assign a function to the button.
+    playBtn.on_click = destroySplash() # assign a function to the button.
     playBtn.tooltip = Tooltip('exit')
 
 # Spawning ground
 def destroySplash():
-    destroy(bg)
-    destroy(playBtn)
-    destroy(splashText)
+    destroy(bg, delay=10)
+    destroy(playBtn, delay=10)
+    destroy(splashText, delay=10)
     startGame()
 
 def startGame():
