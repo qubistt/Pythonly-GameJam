@@ -1,104 +1,99 @@
-# Import Ursina
-# Import time util
+# Import Ursina Engine
 from ursina import *
-from random import uniform
 from ursina.prefabs.first_person_controller import FirstPersonController
-import time
+from ursina.prefabs.health_bar import HealthBar
+from random import uniform
 
-
-
-
-# The main method/app is Ursina's Engine
-# It sets up 3D, 2D scenes etc.
-def splashScreen():
-
-    global bg
-    bg = Entity(
-        parent = camera.ui,
-        model = 'quad',
-        scale = (10,10,10),
-        color = color.white
-    )
-    textShown = dedent(
-        '''<scale: 1><azure>EXTINCT<scale: 1><black>VERSE'''
-    )
-       
-
-    Text.size = 0.10
-    Text.default_resolution = 1080 * Text.size
-    Text.default_font = '../assets/fonts/Fonseca Rounded.otf'
-    
-    global splashText                           
-    splashText = Text(
-        text = textShown,
-        origin = (0,-4),
-         
-    )
-    global playBtn
-    playBtn = Button(text='', color=color.white, icon='../assets/textures/play-button', scale=(0.5,0.25), text_origin=(0,0),origin = (0,1))
-    playBtn.on_click = destroySplash() # assign a function to the button.
-    playBtn.tooltip = Tooltip('exit')
-
-# Spawning ground
-def destroySplash():
-    destroy(bg, delay=10)
-    destroy(playBtn, delay=10)
-    destroy(splashText, delay=10)
-    startGame()
-
-def startGame():
-    ground = Entity(model = 'plane',
-                texture = 'grass',
-                collider = 'mesh',
-                scale = (100,1, 100))
-
-    sky = Sky()
-
-    blocks = Entity(
-        model = 'cube',
-        texture = 'white_cube',
-        position = (0,11,0),
-        color = color.red,
-        collider = 'box'
-    )
-
-
-    goal = Entity(
-        color=color.gold,
-        model='cube',
-        texture='white_cube',
-        position=(0,11,55),
-        scale=(10,1,10),
-        collider='box'
-    )
-    pillar = Entity(
-        color=color.green,
-        model='cube',
-        position=(0,36,58),
-        scale=(1,50,1)
-    )
-
-    player = FirstPersonController(collider = 'box', speed = 30)
-    player.cursor.visible = False
-    if held_keys == 'escape':
-      mouse.visible = True
-      mouse.locked = False
-
-
-    if held_keys == 'q':
-        quit()
-    
+# Initialise the engine
 app = Ursina(vsync=True)
+
+
+ground = Entity(
+    model= 'plane',
+    texture= 'grass',
+    collider= 'mesh',
+    position = (0,0,0),
+    scale= (100,1, 100)
+    )
+
+player = FirstPersonController(
+  collider='box',
+  mouse_sensitivity= (40,40),
+  speed = 30
+  )
+
+light = PointLight(parent = camera, position = (0, 10, -1.5), color = color.white)
+AmbientLight(color = color.rgba(100, 100, 100, 0.1))
+
+health_bar = HealthBar(bar_color=color.lime.tint(-.25), roundness=.5, value=50)
+
+enemy = Entity(
+    model = 'cube',
+    position = (0,1,0),
+    collider = 'box',
+    color = color.red
+)
+enemy.add_script(SmoothFollow(target=player, offset=[0,0,0], speed=0.5))
+
+#def damagePlayer():
+   # health_bar.value -= 1
+    #time.sleep(2)
+
+#def healPlayer():
+    #health_bar.value += 1
+    #
+
+sky = Sky()
+
+jump = Audio(
+  'assets\jump.mp3',
+  loop = False,
+  autoplay = False
+)
+
+walk = Audio(
+  'assets\walk.mp3',
+  loop = False,
+  autoplay = False
+)
+
+
+def update():
+    if player.intersects(enemy):
+        #damagePlayer()
+        health_bar.value -= 1
+
+
+    else:
+        health_bar.value += 0.5
+
+    global lvl
+    walking = held_keys['a'] or \
+          held_keys['d'] or \
+          held_keys['w'] or \
+          held_keys['s']
+    if walking and player.grounded:
+        if not walk.playing:
+            walk.play()
+
+    else:
+        if walk.playing:
+            walk.stop()
+
+
+def input(key):
+    if key == 'q':
+        quit()
+    if key == 'space':
+        if not jump.playing:
+            jump.play()
+
+
 window.title = 'My Game'                # The window title
 window.borderless = False               # Show a border
 window.fullscreen = False               # Go Fullscreen
 window.exit_button.visible = False      # Show the in-game red X that loses the window
 window.fps_counter.enabled = False       # Show the FPS (Frames per second) counter
 
-splashScreen()
+
 app.run()
-
-
-
-
-
